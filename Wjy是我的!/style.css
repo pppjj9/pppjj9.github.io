@@ -177,8 +177,10 @@ section{
 section h2{
   white-space:nowrap;
   color: #ffc0cb;
-  font-size: 15em;
+  font-size: 10em;
   cursor: default;
+  display:-moz-inline-box;
+  display:inline-block;
 }
 .light {
   position: fixed;
