@@ -175,6 +175,7 @@ section{
   justify-content: center;
 }
 section h2{
+  white-space:nowrap;
   color: #ffc0cb;
   font-size: 15em;
   cursor: default;
