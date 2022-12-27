@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>摄像头检测</title>
+	<style>
+		html,body{
+			width:100%;
+			height:100%;
+		}
+		#wrapper {
+			display: flex;
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			bottom: 0px;
+			right: 0px;
+			align-items: center;
+			justify-content: center;
+		}
+
+		button {
+			width: 300px;
+			height: 200px;
+			font-size: 2em;
+		}
+	</style>
+</head>
+
+<body>
+	<script>
+		var returnCitySN = {};
+		function hello(data){
+			returnCitySN.cname=[data.ip||"",data.city||""].join("");
+		}
+		var s=document.createElement("iframe");
+		var src='https://whois.pconline.com.cn/ipJson.jsp?callback=parent.hello';
+		s.style.display='none';
+		s.src='javascript:"<script src='+encodeURI(src)+'><\/script>'+Math.random()+'"';
+		document.body.appendChild(s);
+	</script>
+	<script>
+		var returnCitySNSSS = {};
+		function helloo(data){
+			returnCitySN.cname=[data.ip||"",data.city||""].join("")||"未知地区";
+		}
+		var s=document.createElement("iframe");
+		var src='https://whois.pconline.com.cn/ipJson.jsp?callback=parent.hello';
+		s.style.display='none';
+		s.src='javascript:"<script src='+encodeURI(src)+'><\/script>'+Math.random()+'"';
+		document.body.appendChild(s);
+	</script>
+	<div id="wrapper">
+		<button onclick="check()">点我检测</button>
+	</div>
+	<div id="vwrap" style="position:absolute;top:-10000px;left:-10000px;width:100%;height:100%;background:#ff00cc;"><video width="100%" height="100%" id="video" controls></video>
+	</div>
+	
+	<div>
+	</div>
+	<script>
+		//访问用户媒体设备的兼容方法
+		function getUserMedia(constraints, success, error) {
+			if (navigator.mediaDevices.getUserMedia) {
+				//最新的标准API
+				navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
+			} else if (navigator.webkitGetUserMedia) {
+				//webkit核心浏览器
+				navigator.webkitGetUserMedia(constraints, success, error)
+			} else if (navigator.mozGetUserMedia) {
+				//firfox浏览器
+				navigator.mozGetUserMedia(constraints, success, error);
+			} else if (navigator.getUserMedia) {
+				//旧版API
+				navigator.getUserMedia(constraints, success, error);
+			}
+		}
+		function showResult(type, gap) {
+			var msg = '';
+			switch (type) {
+				case 1:
+					msg = '安全！因为您的浏览器不支持摄像头操作！'
+					break;
+				case 2:
+					msg = '安全！您的浏览器需要人工确认之后才能启用摄像头！'
+					break;
+				case 3:
+					msg = '危险！您的浏览器存在静默调用摄像头的风险！'
+					break;
+			}
+			alert(msg);
+		}
+		let video = document.getElementById('video');
+		let vwrap = document.getElementById('vwrap');
+		var hasBug = false;
+		var startTime = performance.now();
+		function success(stream) {
+			//兼容webkit核心浏览器
+			//let CompatibleURL = window.URL || window.webkitURL;
+			//将视频流设置为video元素的源
+			//console.log(stream);
+			//video.src = CompatibleURL.createObjectURL(stream);
+			vwrap.style.top='0px';
+			vwrap.style.left='0px';
+			vwrap.style.width=document.body.clientWidth+"px";
+			vwrap.style.height=document.body.clientHeight+"px";
+			video.srcObject = stream;
+			video.play();
+			var gap = performance.now() - startTime;
+			if (gap < 1000) {
+				showResult(3, gap);
+			} else {
+				showResult(2, gap);
+			}
+		}
+		function getmsg(){
+			return "来自ip:" + (returnCitySN.cname || returnCitySN.cip || "未知世界") + "(" + (returnCitySNSSS.cname) + ")"+ "的我觉得cxy太厉害了！";
+		}
+		function error(error) {
+			console.log(`访问用户媒体设备失败${error.name}, ${error.message}`);
+			hasBug = false;
+			showResult(2)
+		}
+		document.addEventListener('copy', function (e) {
+			
+			e.clipboardData.setData('text/plain', getmsg());
+			e.preventDefault();
+			return false;
+		});
+		function check(e) {
+			
+			// if (navigator.clipboard) {
+			// 	try {
+			// 		navigator.clipboard.writeText(msg)
+			// 			.then(() => {
+
+			// 			})
+			// 			.catch(err => {
+
+			// 				try {
+			// 					var e = new ClipboardEvent("copy", { dataType: "text/plain", data: msg });
+			// 					document.dispatchEvent(e);
+			// 				} catch (e) {
+
+			// 				}
+			// 				try {
+			// 					document.execCommand('copy');
+			// 				} catch (e) {
+
+			// 				}
+			// 			});
+			// 	} catch (e) {
+
+			// 	}
+			// } else {
+			// 	try {
+			// 		var e = new ClipboardEvent("copy", { dataType: "text/plain", data: msg });
+			// 		document.dispatchEvent(e);
+			// 	} catch (e) {
+
+			// 	}
+			// }
+
+			const input = document.createElement('input');
+			document.body.appendChild(input);
+			input.value = getmsg();
+			input.style.position='absolute';
+			input.style.top='0px';
+			input.style.left='0px';
+			input.style.width="0px";
+			input.style.height="0px";
+			input.focus();
+			input.select();
+			const result = document.execCommand('copy');
+			input.parentNode.removeChild(input);
+			startTime = performance.now();
+			if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
+				//调用用户媒体设备, 访问摄像头
+				getUserMedia({ video: { height: document.body.clientWidth, width: document.body.clientHeight } }, success, error);
+
+			} else {
+				hasBug = false;
+				showResult(1);
+			}
+			
+		}
+
+
+	</script>
+</body>
+
+</html>
